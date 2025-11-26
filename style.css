@@ -1,0 +1,546 @@
+/* style.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5; /* Background ringan seperti aplikasi chat */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.main-container.chat-container {
+    display: flex;
+    flex-direction: column;   /* header di atas, chat di tengah, input di bawah */
+    height: 90vh;             /* tinggi seluruh chat area */
+    max-width: 800px;
+    width: 95%;
+    background: #e5ddd5;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    padding: 0;
+}
+
+/* Header Chat dengan kuning gelap polos */
+header {
+    background-color: #053b81; /* kuning agak gelap */
+    color: #222;               /* teks tetap terbaca */
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.5em;
+    color: white;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Tombol hapus + logout jadi berdekatan */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;  /* jarak antar tombol */
+}
+
+/* Biar ikon sampah rapi */
+.delete-all-btn svg {
+    vertical-align: middle;
+}
+
+/* Header Chat: tulisan hitam */
+header h1 {
+    color: #dcfbfc; /* hitam */
+}
+
+.current-user-tag {
+    margin-left: 15px;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.logout-btn {
+    padding: 8px 15px;
+    background-color: #fc061e;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #000;           /* warna teks & ikon */
+    font-weight: bold;
+}
+
+/* Efek hover seperti delete-all-btn */
+.logout-btn:hover {
+    background: #d62e41 /* warna berubah smooth */
+}
+
+.delete-all-btn {
+    padding: 8px 12px;
+    background-color: #fffb00; /* Warna kuning sampah */
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9em;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+}
+
+.delete-all-btn:hover {
+    background-color: #e0a800;
+}
+
+.send-btn {
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.15s ease;
+}
+
+/* efek hover */
+.send-btn:hover {
+    filter: brightness(85%);   /* warna jadi lebih gelap sedikit */
+    transform: scale(1.06);    /* sedikit membesar */
+}
+
+.rsa-keys-info {
+    background-color: #dcf8c6; /* Warna info ringan */
+    padding: 10px 20px;
+    font-size: 0.85em;
+    color: #333;
+    border-bottom: 1px solid #cce8b5;
+}
+
+.rsa-keys-info details {
+    cursor: pointer;
+}
+
+.rsa-keys-info details summary {
+    font-weight: bold;
+    color: #075e54;
+    list-style: none;
+}
+
+.rsa-keys-info details summary::before {
+    content: 'i ';
+    font-size: 1em;
+    margin-right: 5px;
+    font-weight: normal;
+}
+
+.keys-detail {
+    margin-top: 5px;
+    padding-left: 10px;
+    font-style: italic;
+}
+
+/* --- CHAT AREA --- */
+
+.chat-wrapper {
+    flex: 1;                  /* mengambil sisa ruang antara header & input */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-area {
+    flex: 1;                  /* area chat mengisi sisa ruang */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;          /* scroll otomatis bila pesan banyak */
+    padding: 10px;
+}
+
+.status-info {
+    position: sticky;
+    top: 0;
+    padding: 5px 10px;
+    margin: 5px auto;
+    background-color: #e4e4e4;
+    border-radius: 8px;
+    color: #666;
+    font-size: 0.8em;
+    text-align: center;
+    z-index: 10;
+}
+
+.msg-time {
+    font-size: 10px;        /* kecil */
+    color: #888;            /* abu lembut */
+    display: block;
+    margin-top: 3px;
+    text-align: right;      /* waktu di kanan */
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+    transition: 0.2s;
+}
+
+.delete-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.icon-trash {
+    width: 18px;
+    height: 18px;
+    color: #444; /* bisa disesuaikan */
+}
+
+/* Chatbox utama dengan gradien biru-tosca lembut */
+.chat-box {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    /* Gradien biru tosca, smooth dari cahaya ke bayangan */
+    background: linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(72,191,191,0.5), rgba(0,50,50,0.5));
+    border-radius: 0 0 12px 12px;
+    scroll-behavior: smooth;
+    padding-bottom: 80px;
+}
+
+/* --- MESSAGE BUBBLES --- */
+
+.message {
+    padding: 8px 12px;
+    margin: 5px 10px;
+    border-radius: 8px;
+    max-width: 75%; /* Gelembung tidak mengisi seluruh lebar */
+    word-wrap: break-word;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Pesan masuk mengikuti gradien, semi-transparan */
+.message.received {
+    background: rgba(255, 255, 255, 0.15);  /* transparan */
+    backdrop-filter: blur(5px);             /* blur halus supaya gradien terlihat */
+    align-self: flex-start;
+    border-top-left-radius: 0;
+    color: #fff;                            /* teks tetap terbaca */
+}
+
+/* Pesan keluar juga transparan mengikuti background */
+.message.sent {
+    background: rgba(255, 255, 255, 0.15);  /* transparan */
+    backdrop-filter: blur(5px);             /* blur halus */
+    align-self: flex-end;
+    border-top-right-radius: 0;
+    color: #fff;                            /* teks tetap terbaca */
+}
+
+.message .sender-name {
+    display: block;
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-bottom: 3px;
+    /* warna akan diisi dari JS/Jinja, jadi jangan set di sini */
+}
+
+.message.sent .sender-name {
+    color: #128c7e; /* Warna nama pengirim untuk pesan sendiri */
+}
+
+.message.received .sender-name {
+    /* stylelint-disable-next-line */
+    /* Warna diambil dari JS/Jinja. Jangan ganti di sini */
+}
+
+.message .final-plaintext {
+    margin: 0;
+    font-size: 0.95em;
+    color: #1a1a1a;
+}
+
+/* Detail Kriptografi */
+.details-toggle {
+    margin-top: 5px;
+    border-top: 1px dashed #ccc;
+    padding-top: 3px;
+    font-size: 0.75em;
+    color: #666;
+    cursor: pointer;
+}
+
+.details-toggle summary {
+    font-weight: 500;
+    list-style: none;
+    color: #0e8354; /* Warna untuk 'Lihat Detail' */
+}
+
+.details-toggle summary::before {
+    content: '⚙';
+    margin-right: 5px;
+    display: inline-block;
+}
+
+.details {
+    margin-top: 3px;
+    padding: 3px 0 0 5px; 
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* --- INPUT AREA --- */
+
+.input-area-container {
+    flex-shrink: 0;            /* jangan ikut mengecil */
+    padding: 10px 20px;
+    background-color: #f0f2f5;
+    border-top: 1px solid #ccc;
+}
+
+.input-area {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.input-area select {
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 20px; /* Bentuk lebih bulat */
+    font-size: 0.9em;
+    background-color: #fff;
+    flex-basis: 25%;
+}
+
+.input-area input {
+    padding: 10px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 20px; /* Bentuk lebih bulat */
+    font-size: 0.95em;
+    flex-grow: 1;
+    background-color: #fff;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.input-area button {
+    padding: 10px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%; /* Tombol bulat */
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: opacity 0.3s;
+}
+
+.input-area button:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.input-area button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.system-error {
+    background-color: #ffcccc;
+    color: #cc0000;
+    text-align: center;
+    font-weight: bold;
+    align-self: center;
+}
+
+.input-area button.send-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.input-area button.send-btn:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.input-area button.send-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Background gelap */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Kotak modal */
+.modal-content {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 15px;
+    width: 320px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    animation: fadeIn 0.25s ease-out;
+    text-align: center;
+}
+
+/* Header + ikon */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #222;
+}
+
+/* Tombol */
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.cancel-btn, .confirm-btn {
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background: #ddd;
+}
+
+.confirm-btn {
+    background: #ff4d4d;
+    color: white;
+    text-decoration: none !important;
+    color: black !important;
+    border: 1px solid black;
+}
+
+.confirm-btn:hover {
+    background: #d62828;
+}
+
+.cancel-btn:hover {
+    background: #cfcfcf;
+}
+
+/* Animasi */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.color-picker {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.selected-color {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    display: inline-block;
+}
+
+.color-options {
+    position: absolute;
+    top: 40px; /* di bawah lingkaran utama */
+    left: 0;
+    display: none; /* 🔹 sembunyikan default */
+    flex-wrap: wrap;
+    gap: 5px;
+    background: #fff;
+    padding: 5px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+}
+
+.color-picker.active .color-options {
+    display: flex; /* muncul saat lingkaran diklik */
+}
+
+.color-circle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 1px solid #aaa;
+    cursor: pointer;
+}
+
+#customColorCircle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 1px solid #aaa;
+    cursor: pointer;
+    background: linear-gradient(45deg, red, green, blue); /* warna RGB */
+}
+
+#customColorCircle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 1px solid #aaa;
+    cursor: pointer;
+    /* --- PERUBAHAN UTAMA DI SINI --- */
+    background: conic-gradient(
+        red 0deg, 
+        orange 30deg, 
+        yellow 60deg, 
+        lime 120deg, 
+        #00FFFF 180deg, /* Cyan */
+        blue 240deg, 
+        magenta 300deg, 
+        red 360deg
+    );
+    /* ---------------------------------- */
+}

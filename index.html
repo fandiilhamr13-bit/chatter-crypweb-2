@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if view == 'login' %}Login{% else %}Chat RSA Sebagai {{ current_user }}{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .login-box { 
+            background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; width: 350px; 
+            margin: auto;
+        }
+        .login-box h1 { color: #007bff; margin-bottom: 10px; }
+        .login-box p.desc { margin-bottom: 20px; color: #666; font-size: 0.9em; }
+        .login-box input[type="text"], 
+        .login-box input[type="password"], 
+        .login-box button { 
+            width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc; font-size: 1em; box-sizing: border-box; 
+        }
+        .login-box button { background-color: #007bff; color: white; border: none; cursor: pointer; }
+        .login-box button:hover { background-color: #0056b3; }
+
+        .error-msg { color: red; font-size: 0.8em; margin-bottom: 10px; }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 0.8em;
+            cursor: pointer;
+            margin-left: 10px;
+            float: right;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .delete-btn:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+{% if view == 'login' %}
+
+    <div class="login-box">
+        <h1>CHATTER CRYPWEB</h1>
+        <p class="desc">Masukkan Username dan Password Anda Untuk Membuat Kunci RSA Unik</p>
+
+        {% if error %}
+            <p class="error-msg">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('home') }}">
+            <input type="text" name="username" placeholder="Enter Your Username" required>
+            <input type="password" name="password" placeholder="Enter Your Password" required>
+            <button type="submit">Login & Buat Kunci</button>
+        </form>
+        <p style="font-size:0.8em; color:#070583; font-weight: bold; margin-top: 15px;">
+            Hello Everyone!
+        </p>
+        <p style="font-size:0.8em; color:#000000;">
+            Pastikan isi dengan username dan password yang sama setiap login
+            dan silakan mengobrol dengan user lain.
+        </p>
+    </div>
+
+{% elif view == 'chat' %}
+
+    <div class="main-container chat-container">
+        <header>
+            <div class="header-info">
+                <h1>CHATTER CRYPWEB</h1>
+                <p class="current-user-tag" style="background-color: {{ user_key_data['color'] }};">Username Anda: {{ current_user }}</p>
+            </div>
+            <div class="header-actions">
+                <a href="javascript:void(0);" class="delete-all-btn" onclick="openDeleteAllModal()" title="Hapus Semua Pesan">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                </a>
+                <a href="javascript:void(0);" onclick="openLogoutModal()" class="logout-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="18" height="18" 
+                        viewBox="0 0 24 24" 
+                        fill="none" stroke="currentColor" 
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        style="margin-right: 5px;">
+                        <path d="M10 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/>
+                        <polyline points="15 17 20 12 15 7"/>
+                        <line x1="20" y1="12" x2="8" y2="12"/>
+                    </svg>
+                Logout
+            </a>
+            </div>
+        </header>
+
+        <div class="rsa-keys-info">
+            <details>
+                <summary>Lihat Kunci Kriptografi Anda</summary>
+                <div class="keys-detail">
+                    <p><strong>Public Key (e, n):</strong> ({{ user_key_data['public'][0] }}, {{ user_key_data['public'][1] }})</p>
+                    <p><strong>Privat Key (d, n):</strong> ({{ user_key_data['private'][0] }}, {{ user_key_data['private'][1] }})</p>
+                </div>
+            </details>
+        </div>
+
+        <div class="chat-wrapper">
+            <div class="color-picker">
+                <div class="selected-color" id="selectedColor"></div> <!-- lingkaran utama -->
+                <div class="color-options" id="colorOptions">
+                    <div class="color-circle default-color" data-color="" style="background:#ffffff; display:flex; align-items:center; justify-content:center;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                        </svg>
+                    </div>
+                    <div class="color-circle" data-color="#ff0000" style="background:#ff0000;"></div>
+                    <div class="color-circle" data-color="#ffa500" style="background:#ffa500;"></div>
+                    <div class="color-circle" data-color="#ffff00" style="background:#ffff00;"></div>
+                    <div class="color-circle" data-color="#008000" style="background:#008000;"></div>
+                    <div class="color-circle" data-color="#0000ff" style="background:#0000ff;"></div>
+                    <div class="color-circle" data-color="#800080" style="background:#800080;"></div>
+                    <div class="color-circle custom-color" id="customColorCircle" title="Custom Color"></div>
+                    <input type="color" id="customColorPicker" style="display:none;">
+                </div>
+            </div>
+            <div class="chat-area" id="chat-area">
+                <p class="status-info" id="status-info-incoming">
+                    Memeriksa pesan baru...
+                </p>
+
+                <div class="chat-box" id="incoming-box">
+                    <p style="text-align:center; color:#777777; margin-top: 10px;" id="no-messages-placeholder">
+                        Pilih Username Orang Lain Untuk Memulai Obrolan
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area-container">
+            <div class="input-area">
+                <select id="recipient-select" required>
+                    <option value="">-- Pilih User --</option>
+                </select>
+
+                <input type="text" id="message-input" placeholder="Ketik pesan...">
+
+                <button onclick="sendMessage()" style="background-color: {{ user_key_data['color'] }};" class="send-btn" title="Kirim Pesan">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+const MESSAGE_POLLING_INTERVAL = 2000;
+const USER_POLLING_INTERVAL = 5000;
+
+const ALL_INCOMING_MESSAGES = [
+    {% for msg in messages %} 
+    {
+        id: {{ msg.id }},
+        sender: '{{ msg.sender }}',
+        ciphertext: '{{ msg.ciphertext }}',
+        plaintext: '{{ msg.plaintext }}',
+        decrypted_ascii: [{{ msg.decrypted_ascii | join(', ') }}],
+        color: '{{ msg.color }}',
+        time: '{{ msg.time }}'
+    },
+    {% endfor %}
+];
+
+const CURRENT_USER = '{{ current_user | lower }}';
+
+let ALL_LOCAL_MESSAGES = [...ALL_INCOMING_MESSAGES];
+let lastMessageId = ALL_LOCAL_MESSAGES.length > 0 ? ALL_LOCAL_MESSAGES[ALL_LOCAL_MESSAGES.length-1].id : -1;
+
+const incomingBox = document.getElementById('incoming-box');
+const messageInput = document.getElementById('message-input');
+const recipientSelect = document.getElementById('recipient-select');
+const noMessagesPlaceholder = document.getElementById('no-messages-placeholder');
+const statusInfoIncoming = document.getElementById('status-info-incoming');
+
+let selectedRecipient = null;
+
+recipientSelect.addEventListener('change', function () {
+    selectedRecipient = recipientSelect.value;
+    loadConversation(selectedRecipient);
+});
+
+function scrollToBottom() {
+    incomingBox.scrollTop = incomingBox.scrollHeight;
+}
+
+String.prototype.capitalize = function () {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+};
+
+function loadConversation(recipient) {
+    incomingBox.innerHTML = '';
+
+    if (!recipient) {
+        noMessagesPlaceholder.style.display = 'block';
+        incomingBox.appendChild(noMessagesPlaceholder);
+        return;
+    }
+
+    const conversation = ALL_LOCAL_MESSAGES.filter(msg => {
+        const senderLower = msg.sender.toLowerCase();
+
+        const isOutgoing = msg.isSent && senderLower === CURRENT_USER && msg.recipient.toLowerCase() === recipient;
+        const isIncoming = !msg.isSent && senderLower === recipient;
+
+        return isIncoming || isOutgoing;
+    }).sort((a, b) => a.id - b.id);
+
+    if (conversation.length === 0) {
+        noMessagesPlaceholder.style.display = 'block';
+        incomingBox.appendChild(noMessagesPlaceholder);
+    } else {
+        noMessagesPlaceholder.style.display = 'none';
+        conversation.forEach(msg => {
+            if (msg.isSent) displayEncrypted(msg, false);
+            else displayDecrypted(msg, false);
+        });
+    }
+    scrollToBottom();
+}
+
+function displayDecrypted(msg, append=true) {
+   if (!msg.time) {
+        msg.time = new Date().toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+    if (append) {
+        const exists = ALL_LOCAL_MESSAGES.some(m => m.id === msg.id);
+        if (exists) return;
+
+        ALL_LOCAL_MESSAGES.push(msg);
+        lastMessageId = msg.id;
+    }
+
+    if (msg.sender.toLowerCase() !== selectedRecipient) return;
+
+    const div = document.createElement('div');
+    div.className = 'message received';
+    div.dataset.id = msg.id;
+
+    div.innerHTML = `
+        <span class="sender-name" style="color:${msg.color};">${msg.sender}</span>
+        <button class="delete-btn" onclick="confirmDelete(${msg.id})">
+            <svg viewBox="0 0 24 24" class="icon-trash">
+                <path d="M3 6h18M9 6V4h6v2m-7 4v10m4-10v10m4-10v10M5 6h14l-1 14H6L5 6z"
+                    stroke="currentColor" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <p class="final-plaintext">${msg.plaintext}</p>
+        <span class="msg-time">${msg.time || "--:--"}</span>
+        <details class="details-toggle">
+            <summary>Lihat Detail Dekripsi</summary>
+            <div class="details">
+                <p>ID Pesan: ${msg.id}</p>
+                <p>1. Ciphertext: [${msg.ciphertext}]</p>
+                <p>2. ASCII: [${msg.decrypted_ascii.join(', ')}]</p>
+            </div>
+        </details>
+    `;
+
+    incomingBox.appendChild(div);
+    scrollToBottom();
+}
+
+function displayEncrypted(msg, append=true) {
+    if (append) {
+        msg.id = ++lastMessageId;
+        msg.sender = CURRENT_USER.capitalize();
+        msg.isSent = true;
+        ALL_LOCAL_MESSAGES.push(msg);
+    }
+
+    if (msg.recipient.toLowerCase() !== selectedRecipient) return;
+
+    const div = document.createElement('div');
+    div.className = 'message sent';
+    div.dataset.id = msg.id;
+
+    div.innerHTML = `
+        <span class="sender-name">Anda ke ${msg.recipient}</span>
+        <button class="delete-btn" onclick="confirmDelete(${msg.id})">
+            <svg viewBox="0 0 24 24" class="icon-trash">
+                <path d="M3 6h18M9 6V4h6v2m-7 4v10m4-10v10m4-10v10M5 6h14l-1 14H6L5 6z"
+                    stroke="currentColor" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <p class="final-plaintext">${msg.plaintext}</p>
+        <span class="msg-time">${msg.time}</span>   <!-- ⬅️ Timestamp -->
+        <details class="details-toggle">
+            <summary>Lihat Detail Enkripsi</summary>
+            <div class="details">
+                <p>ID Pesan: ${msg.id}</p>
+                <p>ASCII: [${msg.ascii_list.join(', ')}]</p>
+                <p>Ciphertext: [${msg.ciphertext}]</p>
+            </div>
+        </details>
+    `;
+
+    incomingBox.appendChild(div);
+    scrollToBottom();
+}
+
+async function sendMessage() {
+    const msg = messageInput.value.trim();
+    const recipient = recipientSelect.value;
+
+    if (!msg) return;
+    if (!recipient) {
+        alert("Pilih penerima dulu.");
+        return;
+    }
+
+    const res = await fetch('/send', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+            sender: CURRENT_USER,
+            recipient: recipient,
+            message: msg
+        })
+    });
+
+    const result = await res.json();
+    messageInput.value = "";
+
+    if (result.success) {
+        const timeNow = new Date().toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+        displayEncrypted({
+            plaintext: msg,
+            ciphertext: result.ciphertext,
+            ascii_list: result.ascii_list,
+            recipient: result.recipient,
+            color: result.sender_color,
+            time: timeNow
+        });
+    }
+}
+
+async function pollForMessages() {
+    const res = await fetch(`/get_messages_api?user=${CURRENT_USER}&last_id=${lastMessageId}`);
+    const data = await res.json();
+
+    if (data.messages) {
+        data.messages.forEach(m => displayDecrypted(m));
+    }
+
+    setTimeout(pollForMessages, 2000);
+}
+
+async function pollForUsers() {
+    const res = await fetch('/get_users_api');
+    const data = await res.json();
+
+    repopulateRecipientSelect(data.users);
+    setTimeout(pollForUsers, 5000);
+}
+
+// =====================
+// TIPS: semua user aktif akan muncul di select
+// =====================
+function repopulateRecipientSelect(users) {
+    const prev = recipientSelect.value;
+
+    recipientSelect.innerHTML = '<option value="">-- Pilih User --</option>';
+
+    for (const name in users) {
+        if (name.toLowerCase() !== CURRENT_USER) {  // jangan tampilkan diri sendiri
+            const opt = document.createElement('option');
+            opt.value = name.toLowerCase();
+            opt.textContent = name;
+            opt.dataset.color = users[name].color;
+            recipientSelect.appendChild(opt);
+        }
+    }
+
+    if (recipientSelect.querySelector(`option[value="${prev}"]`)) {
+        recipientSelect.value = prev;
+        selectedRecipient = prev;
+    } else {
+        selectedRecipient = null;
+    }
+}
+
+async function deleteMessage(id) {
+    await fetch(`/delete_message/${id}`, {method:'DELETE'});
+    ALL_LOCAL_MESSAGES = ALL_LOCAL_MESSAGES.filter(m => m.id !== id);
+    loadConversation(selectedRecipient);
+}
+
+async function deleteAllMessages() {
+    const res = await fetch('/delete_all_messages', {method: 'DELETE'});
+    const result = await res.json();
+
+    if (result.success) {
+        ALL_LOCAL_MESSAGES = ALL_LOCAL_MESSAGES.filter(m => m.sender.toLowerCase() !== CURRENT_USER && m.recipient.toLowerCase() !== CURRENT_USER);
+        loadConversation(selectedRecipient);
+        showStatusMessage("✅ Semua pesan Anda berhasil dihapus!");
+    } else {
+        showStatusMessage("❌ Gagal menghapus pesan: " + (result.error || 'Unknown error'));
+    }
+}
+
+function setTanggalHari() {
+    const status = document.getElementById("status-info-incoming");
+
+    const namaHari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+    const namaBulan = [
+        "Januari","Februari","Maret","April","Mei","Juni",
+        "Juli","Agustus","September","Oktober","November","Desember"
+    ];
+
+    const now = new Date();
+    const hari = namaHari[now.getDay()];
+    const tanggal = now.getDate();
+    const bulan = namaBulan[now.getMonth()];
+    const tahun = now.getFullYear();
+
+    status.textContent = `${hari}, ${tanggal} ${bulan} ${tahun}`;
+}
+
+function showStatusMessage(msg, duration = 3000) {
+    const status = document.getElementById('status-info-incoming');
+    status.textContent = msg;
+
+    // Setelah duration ms, kembalikan ke tanggal hari
+    if(duration > 0) {
+        setTimeout(() => {
+            setTanggalHari();
+        }, duration);
+    }
+}
+
+window.onload = function () {
+    pollForMessages();
+    pollForUsers();
+    setTanggalHari();
+
+    const colorPicker = document.querySelector('.color-picker');
+    const selectedColor = document.getElementById('selectedColor');
+    const chatArea = document.getElementById('chat-area');
+    const customColorPicker = document.getElementById('customColorPicker');
+
+    customColorCircle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        customColorPicker.click(); // buka palet warna
+    });
+
+    customColorPicker.addEventListener('input', (e) => {
+        const color = e.target.value;
+        selectedColor.style.backgroundColor = color; // lingkaran utama ikut berubah
+        chatArea.style.backgroundColor = color;      // chat-area ikut berubah
+        colorPicker.classList.remove('active');      // tutup dropdown
+    });
+
+    // warna awal sama dengan background chat-area
+    const initialColor = getComputedStyle(chatArea).backgroundColor;
+    selectedColor.style.backgroundColor = initialColor;
+
+    // klik lingkaran utama untuk buka/close pilihan warna
+    colorPicker.addEventListener('click', (e) => {
+        colorPicker.classList.toggle('active');
+    });
+
+    // pilih warna dari lingkaran lain
+    document.querySelectorAll('.color-circle').forEach(circle => {
+        circle.addEventListener('click', (e) => {
+            e.stopPropagation(); // supaya klik lingkaran tidak menutup otomatis
+            if(circle.classList.contains('custom-color')) return; // custom circle ditangani terpisah
+            const color = circle.dataset.color;
+
+            if (circle.classList.contains('default-color')) {
+                selectedColor.style.backgroundColor = initialColor;
+                chatArea.style.backgroundColor = initialColor;
+            } else {
+                selectedColor.style.backgroundColor = color;
+                chatArea.style.backgroundColor = color;
+            }
+
+            colorPicker.classList.remove('active'); // tutup dropdown setelah pilih warna
+        });
+    });
+
+    // klik di luar untuk menutup dropdown
+    document.addEventListener('click', (e) => {
+        if (!colorPicker.contains(e.target)) {
+            colorPicker.classList.remove('active');
+        }
+    });
+};
+
+</script>
+
+<!-- Modal Logout -->
+<div id="logoutModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+
+            <!-- IKON YANG KAU MAKSUD -->
+            <svg xmlns="http://www.w3.org/2000/svg" 
+                width="35" height="35" viewBox="0 0 24 24"
+                style="margin-right: 10px;">
+                <rect x="0" y="0" width="24" height="24" rx="5" fill="#1e90ff"></rect>
+                <circle cx="12" cy="12" r="8" stroke="red" stroke-width="2" fill="none"></circle>
+                <line x1="12" y1="8" x2="12" y2="12" stroke="red" stroke-width="2" stroke-linecap="round"></line>
+                <circle cx="12" cy="16" r="1.2" fill="red"></circle>
+            </svg>
+
+            <h3>Konfirmasi Logout</h3>
+        </div>
+
+        <p>Apakah kamu yakin ingin keluar?</p>
+
+        <div class="modal-buttons">
+            <button class="cancel-btn" onclick="closeLogoutModal()">No</button>
+            <a class="confirm-btn" href="{{ url_for('logout') }}">Yes</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function openLogoutModal() {
+    document.getElementById("logoutModal").style.display = "flex";
+}
+
+function closeLogoutModal() {
+    document.getElementById("logoutModal").style.display = "none";
+}
+
+function confirmLogout() {
+    window.location.href = "{{ url_for('logout') }}";
+}
+</script>
+
+<!-- Modal Hapus Pesan -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content" style="max-width: 350px;">
+        <div class="modal-header">
+
+            <!-- Ikon tong sampah merah -->
+            <svg xmlns="http://www.w3.org/2000/svg"
+                width="35" height="35" viewBox="0 0 24 24" style="margin-right:10px;">
+                <rect x="0" y="0" width="24" height="24" rx="5" fill="#ffe5e5"></rect>
+                <path d="M3 6h18M9 6V4h6v2m-7 4v10m4-10v10m4-10v10M5 6h14l-1 14H6L5 6z"
+                    stroke="red" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            <h3>Hapus Pesan?</h3>
+        </div>
+
+        <p>Pesan ini akan dihapus permanen.</p>
+
+        <div class="modal-buttons">
+            <button class="cancel-btn" onclick="closeDeleteModal()">Batal</button>
+            <button class="confirm-btn" id="deleteConfirmBtn">Hapus</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let pendingDeleteId = null;
+
+function confirmDelete(id) {
+    pendingDeleteId = id;
+    document.getElementById("deleteModal").style.display = "flex";
+}
+
+function closeDeleteModal() {
+    document.getElementById("deleteModal").style.display = "none";
+}
+
+document.getElementById("deleteConfirmBtn").onclick = async function () {
+    if (pendingDeleteId !== null) {
+        await deleteMessage(pendingDeleteId);
+        pendingDeleteId = null;
+    }
+    closeDeleteModal();
+};
+</script>
+
+<!-- Modal Hapus Semua Pesan -->
+<div id="deleteAllModal" class="modal">
+    <div class="modal-content" style="max-width: 350px;">
+        <div class="modal-header">
+
+            <!-- Ikon tong sampah outline hitam -->
+            <svg xmlns="http://www.w3.org/2000/svg"
+                width="35" height="35" viewBox="0 0 24 24" style="margin-right:10px;">
+                <rect x="0" y="0" width="24" height="24" rx="5" fill="#ffe5e5"></rect>
+                <path d="M3 6h18M9 6V4h6v2m-7 4v10m4-10v10m4-10v10M5 6h14l-1 14H6L5 6z"
+                    stroke="black" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            <h3>Hapus Semua Pesan?</h3>
+        </div>
+
+        <p>Semua pesan Anda akan dihapus permanen.</p>
+
+        <div class="modal-buttons">
+            <button class="cancel-btn" onclick="closeDeleteAllModal()">Batal</button>
+            <button class="confirm-btn" id="deleteAllConfirmBtn">Hapus Semua</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openDeleteAllModal() {
+    document.getElementById("deleteAllModal").style.display = "flex";
+}
+
+function closeDeleteAllModal() {
+    document.getElementById("deleteAllModal").style.display = "none";
+}
+
+document.getElementById("deleteAllConfirmBtn").onclick = async function () {
+    await deleteAllMessages();
+    closeDeleteAllModal();
+};
+</script>
+
+{% endif %}
+
+</body>
+</html>
